@@ -1,4 +1,4 @@
-import { Button, Container, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, useColorMode, useTheme } from '@chakra-ui/react'
+import { Button, Container, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Text, VStack, useColorMode, useTheme } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import Heatmap from './Heatmap'
 import { useStat } from './stat'
@@ -26,10 +26,12 @@ function App() {
     return <><StatArrow type={rate === '0.00' ? 'decrease' : 'increase'} /> {rate} %</>
   }, [])
 
+
   return (
     <Container maxW='64em'>
-      <Button onClick={toggleColorMode} >toggle</Button>
-      <StatGroup mt={4}>
+      <Button onClick={toggleColorMode}>toggle</Button>
+      <VStack alignItems={'stretch'} spacing={8}>
+      <StatGroup mt={8} gap={8} >
         <Stat>
           <StatLabel>本日（小时）</StatLabel>
           <StatNumber>{minuteToHour(stat.day.thisPeriodNum)}</StatNumber>
@@ -60,8 +62,16 @@ function App() {
           </StatHelpText>
         </Stat>
       </StatGroup>
-      <Heatmap theme={colorMode} range={13} highlight={[stat.day.thisPeriod[0]]} start={stat.year.thisPeriod[0]} datas={stat.dayDatas}></Heatmap>
-    </Container>
+      <Heatmap theme={colorMode} range={13} highlight={[stat.day.thisPeriod[1]]} start={stat.year.thisPeriod[0]} datas={stat.dayDatas}></Heatmap>
+      <Text>
+        todo 热力图的色阶和legend
+      </Text>
+      <Text>
+        todo 近14天折线图
+      </Text>
+
+      </VStack>
+      </Container>
   )
 }
 

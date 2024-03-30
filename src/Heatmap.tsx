@@ -38,20 +38,22 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
       // subDomain为一个更小的粒度，必须小于domain（小太多会报错），可以认为是y轴（但会折几次），如github的贡献图的domain，subDomain就是月和日
       // subDomain 可以以
       subDomain: {
-        type: 'ghDay', width: 14, height: 14, sort: 'desc', radius: 3,
-        label: 'D',
+        type: 'ghDay', width: 14, height: 14, sort: 'desc', radius: 4,
+        // label: 'D',
       },
       date: {
         start: start.toDate(),
         locale: {
           weekStart: 1,
         },
-        highlight: highlight.map(x=>x.toDate())
+        highlight: highlight.map(x=>x.add(8, 'hour').toDate())
       },
       data: { 
-        source: datas.map(([d, v]) => ({date: d.format('YYYY-MM-DD'), value: v})),
+        source: datas.filter(x=>x[1] != 0).map(([d, v]) => ({date: d.format('YYYY-MM-DD'), value: v})),
         x: 'date', y: 'value'
       },
+      // scale: {
+      // }
     }, [
       [
         Tooltip,
@@ -84,7 +86,6 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
   return (
     <>
     <Box id={calender.current()[0]}>
-
     </Box>
     </>
   )
