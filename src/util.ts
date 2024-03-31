@@ -1,3 +1,5 @@
+import dayjs, { Dayjs } from "dayjs";
+
 function formatDateToYYYYMMDD(date: Date): string {
     const year = date.getFullYear().toString(); // 获取年份的最后两位
     let month = (date.getMonth() + 1).toString(); // 获取月份，并加1因为 getMonth 返回的是从0开始的值
@@ -84,4 +86,24 @@ export function singleton<T>(supplier: () => T): () => T {
     v = supplier()
     return v
   }
+}
+
+export function days(startInclusive: Date | Dayjs, endInclusive: Date | Dayjs): Dayjs[] {
+  const a = dayjs(startInclusive)
+  const b = dayjs(endInclusive)
+  if (a.isSame(b)) {
+    return []
+  }
+
+  const dayDatas = []
+  if (a.isBefore(b)) {
+    for (let i = a; i.isBefore(b) || i.isSame(b); i = i.add(1, 'day')) {
+        dayDatas.push(i)
+    }
+  } else {
+    for (let i = b; i.isAfter(b) || i.isSame(b); i = i.subtract(1, 'day')) {
+      dayDatas.push(i)
+    }
+  }
+  return dayDatas
 }

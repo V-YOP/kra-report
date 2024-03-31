@@ -7,6 +7,8 @@ import CalHeatmap from 'cal-heatmap';
 import Tooltip from 'cal-heatmap/plugins/Tooltip';
 // @ts-ignore
 import CalendarLabel from 'cal-heatmap/plugins/CalendarLabel';
+// @ts-ignore
+import Legend from 'cal-heatmap/plugins/Legend';
 import { singleton } from "./util";
 import dayjs, { Dayjs } from "dayjs";
 
@@ -19,10 +21,16 @@ type HeatmapArg = {
 }
 function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
   const calender = useRef<() => [string, CalHeatmap]>(singleton(() => [uniqueId('heatmap-'), new CalHeatmap()]));
+  const scheme = useMemo(() => {
+    if (theme === 'dark') {
+      return 'YlGnBu'
+    }
+    return 'YlOrBr'
+  }, [theme])
   useEffect(() => {
     console.log('theme chan', theme)
     calender.current()[1].paint({
-      itemSelector: `#${calender.current()[0]}`,
+      itemSelector: `#${calender.current()[0]}-heatmap`,
       range,
       theme,
       domain: {
@@ -52,8 +60,13 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
         source: datas.filter(x=>x[1] != 0).map(([d, v]) => ({date: d.format('YYYY-MM-DD'), value: v})),
         x: 'date', y: 'value'
       },
-      // scale: {
-      // }
+      scale: {
+        color: {
+          scheme: scheme,
+          type: 'threshold',
+          domain: [30, 60, 90, 120, 150, 200, 250, 300],
+        }
+      }
     }, [
       [
         Tooltip,
@@ -76,7 +89,15 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
           width: 30,
           padding: [24, 10, 0, 0],
         }
-      ]
+      ],
+      [
+        Legend,
+        {
+          // @ts-ignore
+          width: 500,
+          itemSelector: `#${calender.current()[0]}-legend`,
+        },
+      ],
     ])
     return () => {
       calender.current()[1].destroy().catch(console.error)
@@ -85,7 +106,9 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
 
   return (
     <>
-    <Box id={calender.current()[0]}>
+    <Box id={`${calender.current()[0]}-legend`}>
+    </Box>
+    <Box id={`${calender.current()[0]}-heatmap`}>
     </Box>
     </>
   )

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { parseDatas,  } from "./util";
+import { days, parseDatas,  } from "./util";
 import dayjs, { Dayjs } from "dayjs";
 import _ from "lodash";
 import customParseFormat from 'dayjs/plugin/customParseFormat'
@@ -19,7 +19,7 @@ type KraStat = {
     week: PeriodStat,
     month: PeriodStat,
     year: PeriodStat,
-    
+    today: Dayjs,
     dayDatas: [Dayjs, number][],
 }
 
@@ -50,7 +50,6 @@ function useHash(mockData: string = ''): string {
 
 function getToday(): Dayjs {
     let now = dayjs()
-    now.hour()
     // let now = new Date()
     if (now.hour() < 6) {
         now = now.subtract(1, 'day')
@@ -95,10 +94,6 @@ export function useStat(mockData: string = ''): KraStat {
     const sum = Object.values(dateStrToNum).reduce((acc, x) => acc + x, 0)
 
     const startDay = dayjs(_(Object.keys(dateStrToNum)).map(x => dayjs(x, 'YYYY-MM-DD')).minBy(d => d))
-    console.log('start', startDay.toDate())
-    const dayDatas = []
-    for (let i = startDay; i.isBefore(today) || i.isSame(today); i = i.add(1, 'day')) {
-        dayDatas.push([i, getDayNum(i)] as [Dayjs, number])
-    }
-    return {sum, dayDatas, day: getPeriodDatas('day'), month: getPeriodDatas('month'),  week: getPeriodDatas('week'), year: getPeriodDatas('year')} 
+    const dayDatas = days(startDay, today).map(day => [day, getDayNum(day)] as [Dayjs, number])
+    return {today, sum, dayDatas, day: getPeriodDatas('day'), month: getPeriodDatas('month'),  week: getPeriodDatas('week'), year: getPeriodDatas('year')} 
 }

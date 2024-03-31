@@ -1,4 +1,4 @@
-import { Button, Container, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Text, VStack, useColorMode, useTheme } from '@chakra-ui/react'
+import { Button, Container, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Text, VStack, useColorMode, useTheme } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import Heatmap from './Heatmap'
 import { useStat } from './stat'
@@ -26,6 +26,8 @@ function App() {
     return <><StatArrow type={rate === '0.00' ? 'decrease' : 'increase'} /> {rate} %</>
   }, [])
 
+
+  const [range, setRange] = useState(7)
 
   return (
     <Container maxW='64em'>
@@ -62,10 +64,14 @@ function App() {
           </StatHelpText>
         </Stat>
       </StatGroup>
-      <Heatmap theme={colorMode} range={13} highlight={[stat.day.thisPeriod[1]]} start={stat.year.thisPeriod[0]} datas={stat.dayDatas}></Heatmap>
-      <Text>
-        todo 热力图的色阶和legend
-      </Text>
+
+      <Slider  min={1} max={13} step={1} value={range} onChange={setRange} size='sm'>
+        <SliderTrack>
+          <SliderFilledTrack />
+        </SliderTrack>
+        <SliderThumb boxSize={6} />
+      </Slider>
+      <Heatmap theme={colorMode} range={range} highlight={[stat.today]} start={stat.today.subtract(range - 1, 'month')} datas={stat.dayDatas}></Heatmap>
       <Text>
         todo 近14天折线图
       </Text>
