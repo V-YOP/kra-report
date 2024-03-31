@@ -64,7 +64,7 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
         color: {
           scheme: scheme,
           type: 'threshold',
-          domain: [30, 60, 90, 120, 150, 200, 250, 300],
+          domain: [30, 60, 90, 120, 150, 180, 240, 300],
         }
       }
     }, [

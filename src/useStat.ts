@@ -14,7 +14,6 @@ type PeriodStat= {
 
 type KraStat = {
     sum: number,
-
     day: PeriodStat,
     week: PeriodStat,
     month: PeriodStat,
