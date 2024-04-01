@@ -158,12 +158,12 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
         markLine: {
           data: [{
             name: '期望',
-            yAxis: 180,
+            yAxis: EXPECT * 60,
           }, {
             type: 'average',
             name: '平均值',
             lineStyle: {
-              color: average >= 180 ? '' : 'red'
+              color: average >= EXPECT * 60 ? '' : 'red'
             }
           }],
 
