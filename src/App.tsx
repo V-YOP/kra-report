@@ -7,16 +7,17 @@ import { useEcharts } from './useEcharts'
 import { Dayjs } from 'dayjs'
 import _ from 'lodash'
 
+const EXPECT = 3
 
 function minuteToHour(minute: number): string {
-    return (minute / 60).toFixed(1)
+  return (minute / 60).toFixed(1)
 }
 
 function App() {
   const stat = useStat()
   const { colorMode, toggleColorMode } = useColorMode()
   const fourteenDaysEChartOption = useMemo(() => fourteenDaysLineChart(stat.today, stat.dayDatas), [stat])
-  const {id: fourteenDaysEChartId} = useEcharts(fourteenDaysEChartOption, colorMode)
+  const { id: fourteenDaysEChartId } = useEcharts(fourteenDaysEChartOption, colorMode)
 
   const rateText = useCallback((rate: string) => {
     if (rate === '-') {
@@ -34,59 +35,86 @@ function App() {
     <Container maxW='64em'>
       <Button onClick={toggleColorMode}>toggle</Button>
       <VStack alignItems={'stretch'} spacing={8}>
-        <HStack  mt={8} >
-          <Stat flexBasis={'8em'} flexGrow={0}>
+        <HStack mt={8}>
+          <Box flexBasis={'8em'} flexGrow={0}></Box>
+          <Stat flexBasis={'10em'} flexGrow={0}>
             <StatLabel>本日（小时）</StatLabel>
-            <StatNumber>{minuteToHour(stat.day.thisPeriodNum)} / 3</StatNumber>
+            <StatNumber>{minuteToHour(stat.day.thisNaturalNum)} / {EXPECT}</StatNumber>
             <StatHelpText>
-              {rateText(stat.day.rate)}
+              {rateText(stat.day.realRate)}
             </StatHelpText>
           </Stat>
-          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.day.thisPeriodNum) / 3 * 100} />
+          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.day.thisNaturalNum) / EXPECT * 100} />
         </HStack>
 
-      <StatGroup gap={8} >
-        <Stat>
-          <StatLabel>近一周（小时）</StatLabel>
-          <StatNumber>{minuteToHour(stat.week.thisPeriodNum)}</StatNumber>
-          <StatHelpText>
-            {rateText(stat.week.rate)}
-          </StatHelpText>
-        </Stat>
-        <Stat>
-          <StatLabel>近一月（小时）</StatLabel>
-          <StatNumber>{minuteToHour(stat.month.thisPeriodNum)}</StatNumber>
-          <StatHelpText>
-            {rateText(stat.month.rate)}
-          </StatHelpText>
-        </Stat>
-        <Stat>
-          <StatLabel>近一年（小时）</StatLabel>
-          <StatNumber>{minuteToHour(stat.year.thisPeriodNum)}</StatNumber>
-          <StatHelpText>
-            {rateText(stat.year.rate)}
-          </StatHelpText>
-        </Stat>
-      </StatGroup>
+        <HStack>
+          <Stat flexBasis={'8em'} flexGrow={0}>
+            <StatLabel>近一周（小时）</StatLabel>
+            <StatNumber>{minuteToHour(stat.week.thisRealNum)}</StatNumber>
+            <StatHelpText>
+              {rateText(stat.week.realRate)}
+            </StatHelpText>
+          </Stat>
+          <Stat flexBasis={'10em'} flexGrow={0}>
+            <StatLabel>本周（小时）</StatLabel>
+            <StatNumber>{minuteToHour(stat.week.thisNaturalNum)} / {EXPECT * 7}</StatNumber>
+            <StatHelpText>
+              {rateText(stat.week.naturalRate)}
+            </StatHelpText>
+          </Stat>
+          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.week.thisNaturalNum) / (EXPECT * 7) * 100} />
+        </HStack>
+        <HStack>
+          <Stat flexBasis={'8em'} flexGrow={0}>
+            <StatLabel>近一月（小时）</StatLabel>
+            <StatNumber>{minuteToHour(stat.month.thisRealNum)}</StatNumber>
+            <StatHelpText>
+              {rateText(stat.month.realRate)}
+            </StatHelpText>
+          </Stat>
+          <Stat flexBasis={'10em'} flexGrow={0}>
+            <StatLabel>本月（小时）</StatLabel>
+            <StatNumber>{minuteToHour(stat.month.thisNaturalNum)} / {EXPECT * 30}</StatNumber>
+            <StatHelpText>
+              {rateText(stat.month.naturalRate)}
+            </StatHelpText>
+          </Stat>
+          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.month.thisNaturalNum) / (EXPECT * 30) * 100} />
+        </HStack>
+        <HStack>
+          <Stat flexBasis={'8em'} flexGrow={0}>
+            <StatLabel>近一年（小时）</StatLabel>
+            <StatNumber>{minuteToHour(stat.year.thisRealNum)}</StatNumber>
+            <StatHelpText>
+              {rateText(stat.year.realRate)}
+            </StatHelpText>
+          </Stat>
+          
+          <Stat flexBasis={'10em'} flexGrow={0}>
+            <StatLabel>本年（小时）</StatLabel>
+            <StatNumber>{minuteToHour(stat.year.thisNaturalNum)} / {EXPECT * 365} </StatNumber>
+            <StatHelpText>
+              {rateText(stat.year.naturalRate)}
+            </StatHelpText>
+          </Stat>
+          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.year.thisNaturalNum) / (EXPECT * 365) * 100} />
+        </HStack>
 
-      <Slider  min={1} max={12} step={1} value={range} onChange={setRange} size='sm'>
-        <SliderTrack>
-          <SliderFilledTrack />
-        </SliderTrack>
-        <SliderThumb boxSize={6} />
-      </Slider>
-      <Heatmap theme={colorMode} range={range} highlight={[stat.today]} start={stat.today.subtract(range - 1, 'month')} datas={stat.dayDatas}></Heatmap>
-      <Box  height={"500px"}  id={fourteenDaysEChartId}></Box>
-      <Text>
-        todo 近14天折线图，其中标注3小时作为一条线
-      </Text>
+        <Slider min={1} max={12} step={1} value={range} onChange={setRange} size='sm'>
+          <SliderTrack>
+            <SliderFilledTrack />
+          </SliderTrack>
+          <SliderThumb boxSize={6} />
+        </Slider>
+        <Heatmap theme={colorMode} range={range} highlight={[stat.today]} start={stat.today.subtract(range - 1, 'month')} datas={stat.dayDatas}></Heatmap>
+        <Box height={"500px"} id={fourteenDaysEChartId}></Box>
 
-      <Text>
-        TODO 各种max，绘画时间最多的自然天，周，月
-      </Text>
+        <Text>
+          TODO 各种max，绘画时间最多的自然天，周，月
+        </Text>
 
       </VStack>
-      </Container>
+    </Container>
   )
 }
 
@@ -95,13 +123,12 @@ export default App
 function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChartsOption {
   const fourteenDaysAgo = today.subtract(27, 'day')
   const [dates, values] = _(dayDatas)
-      .filter(([date]) => (date.isAfter(fourteenDaysAgo) || date.isSame(fourteenDaysAgo)) &&
-                          (date.isBefore(today) || date.isSame(today)))
-      .map(([date, value]) => [date.format('MM-DD'), value] as [string, number])
-      .reverse()
-      .unzip().value() as [string[], number[]]
+    .filter(([date]) => (date.isAfter(fourteenDaysAgo) || date.isSame(fourteenDaysAgo)) &&
+      (date.isBefore(today) || date.isSame(today)))
+    .map(([date, value]) => [date.format('MM-DD'), value] as [string, number])
+    .reverse()
+    .unzip().value() as [string[], number[]]
   const average = values.length === 0 ? 0 : _(values).sum() / values.length
-  console.log('?', dayDatas)
   return {
     title: {
       text: '近 28 天每日绘画时间（分）'
@@ -124,6 +151,8 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
         data: values,
         type: 'line',
         smooth: true,
+        // sampling: 'average',
+        symbolSize: 8,
         markLine: {
           data: [{
             name: '期望',
@@ -135,7 +164,7 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
               color: average >= 180 ? '' : 'red'
             }
           }],
-          
+
         }
       }
     ]
