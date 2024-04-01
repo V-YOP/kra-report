@@ -1,4 +1,4 @@
-import { Box, Button, Container, HStack, Progress, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Text, VStack, useColorMode, useTheme } from '@chakra-ui/react'
+import { Box, Button, Container, HStack, Progress, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Tag, TagLabel, Text, VStack, useColorMode, useTheme } from '@chakra-ui/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import Heatmap from './Heatmap'
 import { useStat } from './useStat'
@@ -31,6 +31,8 @@ function App() {
 
   const [range, setRange] = useState(7)
 
+  console.log('year', stat.year.thisNatural[0].format('YYYY-MM-DD'), (stat.today.diff(stat.year.thisNatural[0], 'day') + 1))
+
   return (
     <Container maxW='64em'>
       <Button onClick={toggleColorMode}>toggle</Button>
@@ -44,7 +46,7 @@ function App() {
               {rateText(stat.day.realRate)}
             </StatHelpText>
           </Stat>
-          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.day.thisNaturalNum) / EXPECT * 100} />
+          <MyProgress value={+minuteToHour(stat.day.thisNaturalNum) / EXPECT * 100}></MyProgress>
         </HStack>
 
         <HStack>
@@ -62,7 +64,7 @@ function App() {
               {rateText(stat.week.naturalRate)}
             </StatHelpText>
           </Stat>
-          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.week.thisNaturalNum) / (EXPECT * 7) * 100} />
+          <MyProgress expect={(stat.today.diff(stat.week.thisNatural[0], 'day') + 1) / 7 * 100} value={+minuteToHour(stat.week.thisNaturalNum) / (EXPECT * 7) * 100}></MyProgress>
         </HStack>
         <HStack>
           <Stat flexBasis={'8em'} flexGrow={0}>
@@ -79,7 +81,7 @@ function App() {
               {rateText(stat.month.naturalRate)}
             </StatHelpText>
           </Stat>
-          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.month.thisNaturalNum) / (EXPECT * 30) * 100} />
+          <MyProgress expect={(stat.today.diff(stat.month.thisNatural[0], 'day') + 1) / 30 * 100} value={+minuteToHour(stat.month.thisNaturalNum) / (EXPECT * 30) * 100}></MyProgress>
         </HStack>
         <HStack>
           <Stat flexBasis={'8em'} flexGrow={0}>
@@ -89,7 +91,7 @@ function App() {
               {rateText(stat.year.realRate)}
             </StatHelpText>
           </Stat>
-          
+
           <Stat flexBasis={'10em'} flexGrow={0}>
             <StatLabel>本年（小时）</StatLabel>
             <StatNumber>{minuteToHour(stat.year.thisNaturalNum)} / {EXPECT * 365} </StatNumber>
@@ -97,7 +99,7 @@ function App() {
               {rateText(stat.year.naturalRate)}
             </StatHelpText>
           </Stat>
-          <Progress size='lg' isAnimated flexGrow={1} hasStripe value={+minuteToHour(stat.year.thisNaturalNum) / (EXPECT * 365) * 100} />
+          <MyProgress expect={(stat.today.diff(stat.year.thisNatural[0], 'day') + 1) / 365 * 100} value={+minuteToHour(stat.year.thisNaturalNum) / (EXPECT * 365) * 100}></MyProgress>
         </HStack>
 
         <Slider min={1} max={12} step={1} value={range} onChange={setRange} size='sm'>
@@ -169,4 +171,32 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
       }
     ]
   }
+}
+
+function MyProgress({ value, expect }: { value: number, expect?: number }) {
+  return (<>
+    <Box flexGrow={1} position={'relative'}>
+      {expect ? <Tag _after={{
+        content: `''`,
+        position: 'absolute',
+        transform: 'translateX(-50%)',
+        top: '100%',
+        bottom: '-10px',
+        left: '50%',
+        borderWidth: '5px',
+        borderStyle: 'solid',
+        borderColor: 'var(--tag-bg) transparent transparent transparent'
+      }}
+        variant='solid'
+        position={'absolute'}
+        top={"-120%"}
+        right={0}
+        bottom={"120%"}
+        left={`${expect}%`}
+        width={'fit-content'}
+        transform={"translate(-50%, -50%)"}><TagLabel>Expect</TagLabel></Tag> : <></>}
+     
+      <Progress size='lg' isAnimated flexGrow={1} hasStripe value={value} />
+    </Box>
+  </>)
 }
