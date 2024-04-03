@@ -22,7 +22,7 @@ function App() {
   const twelveMonthLineChartOption = useMemo(() => twelveMonthLineChart(stat.today, stat.dayDatas), [stat])
   const { id: fourteenDaysEChartId } = useEcharts(fourteenDaysEChartOption, colorMode)
   const { id: twelveMonthLineChartId } = useEcharts(twelveMonthLineChartOption, colorMode)
-  
+
   const rateText = useCallback((rate: string) => {
     if (rate === '-') {
       return <><StatArrow type='increase' /> - %</>
@@ -188,10 +188,10 @@ function twelveMonthLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChart
   const v = _.groupBy(dayDatas.map(([d, v]) => [d.format('YY-MM'), v] as [string, number]).filter(([date,]) => months.has(date)), d => d[0])
   const datas: [string, string][] = []
   for (const month of Object.keys(v).sort((a, b) => b.localeCompare(a))) {
-    datas.push([month, (v[month].map(x=>x[1]).reduce((acc, x) => acc + x, 0) / 60).toFixed(2)])
+    datas.push([month, (v[month].map(x => x[1]).reduce((acc, x) => acc + x, 0) / 60).toFixed(2)])
   }
 
-  const average = datas.length === 0 ? 0 : _(datas.map(x=>x[1])).sum() / datas.length
+  const average = datas.length === 0 ? 0 : _(datas.map(x => x[1])).sum() / datas.length
   return {
     title: {
       text: '近 12 月绘画时间（小时）'
@@ -201,7 +201,7 @@ function twelveMonthLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChart
     },
     xAxis: {
       type: 'category',
-      data: datas.map(x=>x[0])
+      data: datas.map(x => x[0])
     },
     yAxis: {
       type: 'value',
@@ -211,7 +211,7 @@ function twelveMonthLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChart
     },
     series: [
       {
-        data: datas.map(x=>x[1]),
+        data: datas.map(x => x[1]),
         type: 'line',
         smooth: true,
         // sampling: 'average',
@@ -234,35 +234,36 @@ function twelveMonthLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChart
 }
 
 function MyProgress({ max, value, expect }: { max: number, value: number, expect?: number }) {
+  const MyTag = useCallback(({ position, label, colorScheme, z = 1 }: { z?: number, colorScheme: string, position: number, label: string }) => (<Tag _after={{
+    content: `''`,
+    position: 'absolute',
+    transform: 'translateX(-50%)',
+    top: '100%',
+    bottom: '-10px',
+    left: '50%',
+    zIndex: z,
+    borderWidth: '5px',
+    borderStyle: 'solid',
+    borderColor: 'var(--tag-bg) transparent transparent transparent'
+  }}
+    variant='solid'
+    zIndex={z}
+    colorScheme={colorScheme}
+    position={'absolute'}
+    top={"-120%"}
+    right={0}
+    bottom={"120%"}
+    left={`${(position >= 100 ? 100 : position).toFixed(2)}%`}
+    width={'fit-content'}
+    transform={"translate(-50%, -50%)"}><TagLabel>{label}</TagLabel></Tag>), [])
   console.log(max, value, expect)
   return (
     <Box flexGrow={1} position={'relative'}>
       {expect ?
-        <Tooltip label={``} placement='top'>
-          <Tag _after={{
-            content: `''`,
-            position: 'absolute',
-            transform: 'translateX(-50%)',
-            top: '100%',
-            bottom: '-10px',
-            left: '50%',
-            borderWidth: '5px',
-            borderStyle: 'solid',
-            borderColor: 'var(--tag-bg) transparent transparent transparent'
-          }}
-            variant='solid'
-            colorScheme='blue'
-            position={'absolute'}
-            top={"-120%"}
-            right={0}
-            bottom={"120%"}
-            left={`${(expect / max * 100).toFixed(2)}%`}
-            width={'fit-content'}
-            transform={"translate(-50%, -50%)"}><TagLabel>Expect: {expect} </TagLabel></Tag>
-        </Tooltip>
-
+        <MyTag position={expect / max * 100} label={`Expect: ${(expect / max * 100).toFixed(0)}%`} colorScheme='blue' z={0}></MyTag>
         : <></>}
 
+      <MyTag position={value / max * 100} label={`${(value / max * 100).toFixed(0)}%`} colorScheme={expect ? value < expect ? 'red' : 'blue' : value >= max ? 'blue' : 'red'} z={1}></MyTag>
       <Progress max={max} size='lg' isAnimated flexGrow={1} hasStripe value={value} />
     </Box>
   )
