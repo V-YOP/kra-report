@@ -39,7 +39,7 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
           const idx = dayjs(new Date(date)).month()
           return ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'][idx]
         }, textAlign: 'start', position: 'top' },
-        dynamicDimension: true,
+        dynamicDimension: false,
         sort: 'desc',
         gutter: 12,
       },
@@ -108,7 +108,7 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
     <>
     <Box id={`${calender.current()[0]}-legend`}>
     </Box>
-    <Box id={`${calender.current()[0]}-heatmap`}>
+    <Box id={`${calender.current()[0]}-heatmap`} width="100%">
     </Box>
     </>
   )

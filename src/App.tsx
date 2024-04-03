@@ -1,11 +1,13 @@
-import { Box, Button, Container, HStack, Progress, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Tag, TagLabel, Text, VStack, useColorMode, useTheme } from '@chakra-ui/react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Box, Button, Container, HStack, Progress, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Tag, TagLabel, Text, Tooltip, VStack, useColorMode, useTheme } from '@chakra-ui/react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Heatmap from './Heatmap'
 import { useStat } from './useStat'
 import { EChartsOption } from 'echarts'
 import { useEcharts } from './useEcharts'
 import { Dayjs } from 'dayjs'
 import _ from 'lodash'
+import * as d3 from "d3";
+import { dayjsLe } from './util'
 
 const EXPECT = 3
 
@@ -17,8 +19,10 @@ function App() {
   const stat = useStat()
   const { colorMode, toggleColorMode } = useColorMode()
   const fourteenDaysEChartOption = useMemo(() => fourteenDaysLineChart(stat.today, stat.dayDatas), [stat])
+  const twelveMonthLineChartOption = useMemo(() => twelveMonthLineChart(stat.today, stat.dayDatas), [stat])
   const { id: fourteenDaysEChartId } = useEcharts(fourteenDaysEChartOption, colorMode)
-
+  const { id: twelveMonthLineChartId } = useEcharts(twelveMonthLineChartOption, colorMode)
+  
   const rateText = useCallback((rate: string) => {
     if (rate === '-') {
       return <><StatArrow type='increase' /> - %</>
@@ -35,6 +39,7 @@ function App() {
 
   return (
     <Container maxW='64em'>
+      {/* <AnotherProgress /> */}
       <Button onClick={toggleColorMode}>toggle</Button>
       <VStack alignItems={'stretch'} spacing={8}>
         <HStack mt={8}>
@@ -46,7 +51,7 @@ function App() {
               {rateText(stat.day.realRate)}
             </StatHelpText>
           </Stat>
-          <MyProgress value={+minuteToHour(stat.day.thisNaturalNum) / EXPECT * 100}></MyProgress>
+          <MyProgress max={EXPECT} value={+minuteToHour(stat.day.thisNaturalNum)}></MyProgress>
         </HStack>
 
         <HStack>
@@ -64,7 +69,7 @@ function App() {
               {rateText(stat.week.naturalRate)}
             </StatHelpText>
           </Stat>
-          <MyProgress expect={(stat.today.diff(stat.week.thisNatural[0], 'day') + 1) / 7 * 100} value={+minuteToHour(stat.week.thisNaturalNum) / (EXPECT * 7) * 100}></MyProgress>
+          <MyProgress max={EXPECT * 7} expect={(stat.today.diff(stat.week.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.week.thisNaturalNum)}></MyProgress>
         </HStack>
         <HStack>
           <Stat flexBasis={'8em'} flexGrow={0}>
@@ -81,7 +86,7 @@ function App() {
               {rateText(stat.month.naturalRate)}
             </StatHelpText>
           </Stat>
-          <MyProgress expect={(stat.today.diff(stat.month.thisNatural[0], 'day') + 1) / 30 * 100} value={+minuteToHour(stat.month.thisNaturalNum) / (EXPECT * 30) * 100}></MyProgress>
+          <MyProgress max={EXPECT * 30} expect={(stat.today.diff(stat.month.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.month.thisNaturalNum)}></MyProgress>
         </HStack>
         <HStack>
           <Stat flexBasis={'8em'} flexGrow={0}>
@@ -99,7 +104,7 @@ function App() {
               {rateText(stat.year.naturalRate)}
             </StatHelpText>
           </Stat>
-          <MyProgress expect={(stat.today.diff(stat.year.thisNatural[0], 'day') + 1) / 365 * 100} value={+minuteToHour(stat.year.thisNaturalNum) / (EXPECT * 365) * 100}></MyProgress>
+          <MyProgress max={EXPECT * 365} expect={(stat.today.diff(stat.year.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.year.thisNaturalNum)}></MyProgress>
         </HStack>
 
         <Slider min={1} max={12} step={1} value={range} onChange={setRange} size='sm'>
@@ -108,11 +113,15 @@ function App() {
           </SliderTrack>
           <SliderThumb boxSize={6} />
         </Slider>
-        <Heatmap theme={colorMode} range={range} highlight={[stat.today]} start={stat.today.subtract(range - 1, 'month')} datas={stat.dayDatas}></Heatmap>
-        <Box height={"500px"} id={fourteenDaysEChartId}></Box>
-
+        <Heatmap theme={colorMode} range={range} highlight={[stat.today]} start={stat.today.subtract(range - 1, 'month').add(1, 'day')} datas={stat.dayDatas}></Heatmap>
+        <Box height={"400px"} id={fourteenDaysEChartId}></Box>
+        <Box height={"400px"} id={twelveMonthLineChartId}></Box>
         <Text>
           TODO 各种max，绘画时间最多的自然天，周，月
+        </Text>
+
+        <Text>
+          TODO 进度条换成堆叠的
         </Text>
 
       </VStack>
@@ -125,8 +134,7 @@ export default App
 function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChartsOption {
   const fourteenDaysAgo = today.subtract(27, 'day')
   const [dates, values] = _(dayDatas)
-    .filter(([date]) => (date.isAfter(fourteenDaysAgo) || date.isSame(fourteenDaysAgo)) &&
-      (date.isBefore(today) || date.isSame(today)))
+    .filter(([date]) => dayjsLe(date, today) && dayjsLe(fourteenDaysAgo, date))
     .map(([date, value]) => [date.format('MM-DD'), value] as [string, number])
     .reverse()
     .unzip().value() as [string[], number[]]
@@ -166,37 +174,158 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
               color: average >= EXPECT * 60 ? '' : 'red'
             }
           }],
-
         }
       }
     ]
   }
 }
 
-function MyProgress({ value, expect }: { value: number, expect?: number }) {
-  return (<>
+function twelveMonthLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChartsOption {
+  const months: Set<string> = new Set()
+  for (let i = today.subtract(11, 'month'); dayjsLe(i, today); i = i.add(1, 'month')) {
+    months.add(i.format('YY-MM'))
+  }
+  const v = _.groupBy(dayDatas.map(([d, v]) => [d.format('YY-MM'), v] as [string, number]).filter(([date,]) => months.has(date)), d => d[0])
+  const datas: [string, string][] = []
+  for (const month of Object.keys(v).sort((a, b) => b.localeCompare(a))) {
+    datas.push([month, (v[month].map(x=>x[1]).reduce((acc, x) => acc + x, 0) / 60).toFixed(2)])
+  }
+
+  const average = datas.length === 0 ? 0 : _(datas.map(x=>x[1])).sum() / datas.length
+  return {
+    title: {
+      text: '近 12 月绘画时间（小时）'
+    },
+    tooltip: {
+      trigger: 'item',
+    },
+    xAxis: {
+      type: 'category',
+      data: datas.map(x=>x[0])
+    },
+    yAxis: {
+      type: 'value',
+      // max: 300,
+      interval: 10,
+      max: (v) => v.max > EXPECT * 30 ? (Math.floor(v.max / 10) + 1) * 10 : 100
+    },
+    series: [
+      {
+        data: datas.map(x=>x[1]),
+        type: 'line',
+        smooth: true,
+        // sampling: 'average',
+        symbolSize: 8,
+        markLine: {
+          data: [{
+            name: '期望',
+            yAxis: EXPECT * 30,
+          }, {
+            type: 'average',
+            name: '平均值',
+            lineStyle: {
+              color: average >= EXPECT * 30 ? '' : 'red'
+            }
+          }],
+        }
+      }
+    ]
+  }
+}
+
+function MyProgress({ max, value, expect }: { max: number, value: number, expect?: number }) {
+  console.log(max, value, expect)
+  return (
     <Box flexGrow={1} position={'relative'}>
-      {expect ? <Tag _after={{
-        content: `''`,
-        position: 'absolute',
-        transform: 'translateX(-50%)',
-        top: '100%',
-        bottom: '-10px',
-        left: '50%',
-        borderWidth: '5px',
-        borderStyle: 'solid',
-        borderColor: 'var(--tag-bg) transparent transparent transparent'
-      }}
-        variant='solid'
-        position={'absolute'}
-        top={"-120%"}
-        right={0}
-        bottom={"120%"}
-        left={`${expect}%`}
-        width={'fit-content'}
-        transform={"translate(-50%, -50%)"}><TagLabel>Expect</TagLabel></Tag> : <></>}
-     
-      <Progress size='lg' isAnimated flexGrow={1} hasStripe value={value} />
+      {expect ?
+        <Tooltip label={``} placement='top'>
+          <Tag _after={{
+            content: `''`,
+            position: 'absolute',
+            transform: 'translateX(-50%)',
+            top: '100%',
+            bottom: '-10px',
+            left: '50%',
+            borderWidth: '5px',
+            borderStyle: 'solid',
+            borderColor: 'var(--tag-bg) transparent transparent transparent'
+          }}
+            variant='solid'
+            colorScheme='blue'
+            position={'absolute'}
+            top={"-120%"}
+            right={0}
+            bottom={"120%"}
+            left={`${(expect / max * 100).toFixed(2)}%`}
+            width={'fit-content'}
+            transform={"translate(-50%, -50%)"}><TagLabel>Expect: {expect} </TagLabel></Tag>
+        </Tooltip>
+
+        : <></>}
+
+      <Progress max={max} size='lg' isAnimated flexGrow={1} hasStripe value={value} />
     </Box>
-  </>)
+  )
+}
+
+function AnotherProgress() {
+  const ref = useRef<SVGSVGElement>(undefined as unknown as SVGSVGElement);
+  useEffect(() => {
+    // 准备数据
+    const data = [
+      { category: '每天', actualValue: 50, expectedValue: 70 },
+      { category: '每周', actualValue: 80, expectedValue: 90 },
+      { category: '每月', actualValue: 60, expectedValue: 75 }
+    ];
+
+    // 创建 SVG 容器
+    const svgWidth = 600;
+    const svgHeight = 400;
+    const svg = d3.select(ref.current)
+      .append('svg')
+      .attr('width', svgWidth)
+      .attr('height', svgHeight);
+
+    // 定义比例尺
+    const maxValue = Math.max(...data.map(d => d.actualValue), ...data.map(d => d.expectedValue));
+    const xScale = d3.scaleLinear()
+      .domain([0, maxValue])
+      .range([0, svgWidth]);
+
+    // 创建堆叠进度条图
+    svg.selectAll('rect')
+      .data(data)
+      .enter()
+      .append('rect')
+      .attr('x', 0)
+      .attr('y', (d, i) => i * 100)
+      .attr('width', d => xScale(d.actualValue))
+      .attr('height', 50)
+      .attr('fill', 'steelblue');
+
+    // 添加标识期望值的线
+    const expectedLine = svg.append('line')
+      .attr('x1', xScale(70)) // 期望值为 70，可以根据实际情况调整
+      .attr('y1', 0)
+      .attr('x2', xScale(70))
+      .attr('y2', svgHeight)
+      .attr('stroke', 'red')
+      .attr('stroke-width', 2);
+
+    // 添加坐标轴和其他标签
+    const xAxis = d3.axisBottom(xScale);
+    svg.append('g')
+      .attr('transform', `translate(0, ${svgHeight - 20})`)
+      .call(xAxis);
+
+    // 添加标题
+    svg.append('text')
+      .attr('x', svgWidth / 2)
+      .attr('y', 30)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '20px')
+      .text('堆叠进度条图（实际值 vs. 期望值）');
+  }, [])
+
+  return <svg ref={ref}></svg>
 }

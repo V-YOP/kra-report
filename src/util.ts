@@ -107,3 +107,9 @@ export function days(startInclusive: Date | Dayjs, endInclusive: Date | Dayjs): 
   }
   return dayDatas
 }
+
+export function dayjsLe(left: Date | Dayjs, right: Date | Dayjs): boolean {
+  const a = dayjs(left)
+  const b = dayjs(right)
+  return a.isBefore(b) || a.isSame(b)
+}
