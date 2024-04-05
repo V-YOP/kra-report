@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import { random, uniqueId } from "lodash";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import 'cal-heatmap/cal-heatmap.css';
@@ -86,7 +86,7 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
           // @ts-ignore
           text: () => ['一', '', '三', '', '五', '', ''],
           textAlign: 'end',
-          width: 30,
+          width: 20,
           padding: [24, 10, 0, 0],
         }
       ],
@@ -108,8 +108,9 @@ function Heatmap({theme, start, highlight, range, datas}: HeatmapArg) {
     <>
     <Box id={`${calender.current()[0]}-legend`}>
     </Box>
-    <Box id={`${calender.current()[0]}-heatmap`} width="100%">
-    </Box>
+    <Flex width="100%" flexDir={'row'} justifyContent={'center'}>
+      <Box id={`${calender.current()[0]}-heatmap`}></Box>
+    </Flex>
     </>
   )
 }

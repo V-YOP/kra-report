@@ -1,4 +1,4 @@
-import { Box, Button, Container, HStack, Progress, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Tag, TagLabel, Text, Tooltip, VStack, useColorMode, useTheme } from '@chakra-ui/react'
+import { Box, Button, Card, CardBody, CardHeader, Container, Flex, Grid, GridItem, HStack, Heading, Progress, SimpleGrid, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Tag, TagLabel, Text, Tooltip, VStack, Wrap, WrapItem, useColorMode, useTheme } from '@chakra-ui/react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Heatmap from './Heatmap'
 import { useStat } from './useStat'
@@ -33,89 +33,134 @@ function App() {
     return <><StatArrow type={rate === '0.00' ? 'decrease' : 'increase'} /> {rate} %</>
   }, [])
 
-  const [range, setRange] = useState(7)
+  const [range, setRange] = useState(17)
 
   console.log('year', stat.year.thisNatural[0].format('YYYY-MM-DD'), (stat.today.diff(stat.year.thisNatural[0], 'day') + 1))
 
   return (
-    <Container maxW='64em'>
+    <Container maxW='96em'>
       {/* <AnotherProgress /> */}
       <Button onClick={toggleColorMode}>toggle</Button>
-      <VStack alignItems={'stretch'} spacing={8}>
-        <HStack mt={8}>
-          <Box flexBasis={'8em'} flexGrow={0}></Box>
-          <Stat flexBasis={'10em'} flexGrow={0}>
-            <StatLabel>本日（小时）</StatLabel>
-            <StatNumber>{minuteToHour(stat.day.thisNaturalNum)} / {EXPECT}</StatNumber>
-            <StatHelpText>
-              {rateText(stat.day.realRate)}
-            </StatHelpText>
-          </Stat>
-          <MyProgress max={EXPECT} value={+minuteToHour(stat.day.thisNaturalNum)}></MyProgress>
-        </HStack>
+      <Flex flexWrap={'wrap'} gap={4}>
 
-        <HStack>
-          <Stat flexBasis={'8em'} flexGrow={0}>
-            <StatLabel>近一周（小时）</StatLabel>
-            <StatNumber>{minuteToHour(stat.week.thisRealNum)}</StatNumber>
-            <StatHelpText>
-              {rateText(stat.week.realRate)}
-            </StatHelpText>
-          </Stat>
-          <Stat flexBasis={'10em'} flexGrow={0}>
-            <StatLabel>本周（小时）</StatLabel>
-            <StatNumber>{minuteToHour(stat.week.thisNaturalNum)} / {EXPECT * 7}</StatNumber>
-            <StatHelpText>
-              {rateText(stat.week.naturalRate)}
-            </StatHelpText>
-          </Stat>
-          <MyProgress max={EXPECT * 7} expect={(stat.today.diff(stat.week.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.week.thisNaturalNum)}></MyProgress>
-        </HStack>
-        <HStack>
-          <Stat flexBasis={'8em'} flexGrow={0}>
-            <StatLabel>近一月（小时）</StatLabel>
-            <StatNumber>{minuteToHour(stat.month.thisRealNum)}</StatNumber>
-            <StatHelpText>
-              {rateText(stat.month.realRate)}
-            </StatHelpText>
-          </Stat>
-          <Stat flexBasis={'10em'} flexGrow={0}>
-            <StatLabel>本月（小时）</StatLabel>
-            <StatNumber>{minuteToHour(stat.month.thisNaturalNum)} / {EXPECT * 30}</StatNumber>
-            <StatHelpText>
-              {rateText(stat.month.naturalRate)}
-            </StatHelpText>
-          </Stat>
-          <MyProgress max={EXPECT * 30} expect={(stat.today.diff(stat.month.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.month.thisNaturalNum)}></MyProgress>
-        </HStack>
-        <HStack>
-          <Stat flexBasis={'8em'} flexGrow={0}>
-            <StatLabel>近一年（小时）</StatLabel>
-            <StatNumber>{minuteToHour(stat.year.thisRealNum)}</StatNumber>
-            <StatHelpText>
-              {rateText(stat.year.realRate)}
-            </StatHelpText>
-          </Stat>
+        <Box flexBasis={"100%"}>
+          <Card>
+            <CardBody>
+              <HStack>
+                <Stat flexBasis={'10em'} flexGrow={0} >
+                  <StatLabel>本日（小时）</StatLabel>
+                  <StatNumber>{minuteToHour(stat.day.thisNaturalNum)} / {EXPECT}</StatNumber>
+                  <StatHelpText>
+                    {rateText(stat.day.realRate)}
+                  </StatHelpText>
+                </Stat>
+                <MyProgress max={EXPECT} value={+minuteToHour(stat.day.thisNaturalNum)}></MyProgress>
+              </HStack>
+            </CardBody>
+          </Card>
+        </Box>
 
-          <Stat flexBasis={'10em'} flexGrow={0}>
-            <StatLabel>本年（小时）</StatLabel>
-            <StatNumber>{minuteToHour(stat.year.thisNaturalNum)} / {EXPECT * 365} </StatNumber>
-            <StatHelpText>
-              {rateText(stat.year.naturalRate)}
-            </StatHelpText>
-          </Stat>
-          <MyProgress max={EXPECT * 365} expect={(stat.today.diff(stat.year.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.year.thisNaturalNum)}></MyProgress>
-        </HStack>
+        <Box flexBasis={0} flexGrow={1}>
+          <Card>
+            <CardBody>
+              <VStack alignItems={'stretch'} spacing={8}>
+              <HStack>
+                <Stat flexBasis={'8em'} flexGrow={0}>
+                  <StatLabel>近一周（小时）</StatLabel>
+                  <StatNumber>{minuteToHour(stat.week.thisRealNum)}</StatNumber>
+                  <StatHelpText>
+                    {rateText(stat.week.realRate)}
+                  </StatHelpText>
+                </Stat>
+                <Stat flexBasis={'10em'} flexGrow={0}>
+                  <StatLabel>本周（小时）</StatLabel>
+                  <StatNumber>{minuteToHour(stat.week.thisNaturalNum)} / {EXPECT * 7}</StatNumber>
+                  <StatHelpText>
+                    {rateText(stat.week.naturalRate)}
+                  </StatHelpText>
+                </Stat>
+                <MyProgress max={EXPECT * 7} expect={(stat.today.diff(stat.week.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.week.thisNaturalNum)}></MyProgress>
+              </HStack>
+              <HStack>
+                <Stat flexBasis={'8em'} flexGrow={0}>
+                  <StatLabel>近一月（小时）</StatLabel>
+                  <StatNumber>{minuteToHour(stat.month.thisRealNum)}</StatNumber>
+                  <StatHelpText>
+                    {rateText(stat.month.realRate)}
+                  </StatHelpText>
+                </Stat>
+                <Stat flexBasis={'10em'} flexGrow={0}>
+                  <StatLabel>本月（小时）</StatLabel>
+                  <StatNumber>{minuteToHour(stat.month.thisNaturalNum)} / {EXPECT * 30}</StatNumber>
+                  <StatHelpText>
+                    {rateText(stat.month.naturalRate)}
+                  </StatHelpText>
+                </Stat>
+                <MyProgress max={EXPECT * 30} expect={(stat.today.diff(stat.month.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.month.thisNaturalNum)}></MyProgress>
+              </HStack>
 
-        <Slider min={1} max={12} step={1} value={range} onChange={setRange} size='sm'>
+              <HStack>
+                <Stat flexBasis={'8em'} flexGrow={0}>
+                  <StatLabel>近一年（小时）</StatLabel>
+                  <StatNumber>{minuteToHour(stat.year.thisRealNum)}</StatNumber>
+                  <StatHelpText>
+                    {rateText(stat.year.realRate)}
+                  </StatHelpText>
+                </Stat>
+
+                <Stat flexBasis={'10em'} flexGrow={0}>
+                  <StatLabel>本年（小时）</StatLabel>
+                  <StatNumber>{minuteToHour(stat.year.thisNaturalNum)} / {EXPECT * 365} </StatNumber>
+                  <StatHelpText>
+                    {rateText(stat.year.naturalRate)}
+                  </StatHelpText>
+                </Stat>
+                <MyProgress max={EXPECT * 365} expect={(stat.today.diff(stat.year.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.year.thisNaturalNum)}></MyProgress>
+              </HStack>
+              </VStack>
+              
+            </CardBody>
+          </Card>
+        </Box>
+
+        
+
+      <Card flexBasis={"0"} flexGrow={1}>
+        <CardBody>
+        <Box height={"100%"} id={fourteenDaysEChartId}></Box>
+        </CardBody>
+      </Card>
+
+      <Card flexBasis={"100%"} flexGrow={1}>
+        <CardBody>
+          
+        <VStack>
+        {/* <Slider min={1} max={12} step={1} value={range} onChange={setRange} size='sm'>
           <SliderTrack>
             <SliderFilledTrack />
           </SliderTrack>
           <SliderThumb boxSize={6} />
-        </Slider>
+        </Slider> */}
         <Heatmap theme={colorMode} range={range} highlight={[stat.today]} start={stat.today.subtract(range - 1, 'month').add(1, 'day')} datas={stat.dayDatas}></Heatmap>
-        <Box height={"400px"} id={fourteenDaysEChartId}></Box>
-        <Box height={"400px"} id={twelveMonthLineChartId}></Box>
+      
+      </VStack>  
+      
+      </CardBody>
+      </Card>
+      
+
+        
+
+      <Card flexBasis={"0"} flexGrow={1}>
+        <CardBody>
+        <Box height={"350px"} id={twelveMonthLineChartId}></Box>
+        </CardBody>
+      </Card>
+
+
+      </Flex>
+      <VStack alignItems={'stretch'} spacing={8}>
+
         <Text>
           TODO 各种max，绘画时间最多的自然天，周，月
         </Text>
