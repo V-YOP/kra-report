@@ -51,7 +51,7 @@ export function useStat(mockData: string = ''): KraStat {
     if (period === 'day') {
       thisNatural = [...thisReal]
     } else if (period === 'week') {
-      thisNatural = today.day() === 0 ? [today.subtract(1, 'week').add(1, 'day'), today] : [today.day(1), today]
+      thisNatural = [today.day() === 0 ? today.subtract(1, 'week').add(1, 'day'): today.day(1), today]
     } else if (period === 'month') {
       thisNatural = [today.date(1), today]
     } else {

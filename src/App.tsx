@@ -9,7 +9,7 @@ import _ from 'lodash'
 import * as d3 from "d3";
 import { dayjsLe } from './util'
 
-const EXPECT = 3
+const EXPECT = 2
 
 function minuteToHour(minute: number): string {
   return (minute / 60).toFixed(1)
@@ -20,8 +20,10 @@ function App() {
   const { colorMode, toggleColorMode } = useColorMode()
   const fourteenDaysEChartOption = useMemo(() => fourteenDaysLineChart(stat.today, stat.dayDatas), [stat])
   const twelveMonthLineChartOption = useMemo(() => twelveMonthLineChart(stat.today, stat.dayDatas), [stat])
+  const twelveWeekLineChartOption = useMemo(() => twelveWeekLineChart(stat.today, stat.dayDatas), [stat])
   const { id: fourteenDaysEChartId } = useEcharts(fourteenDaysEChartOption, colorMode)
   const { id: twelveMonthLineChartId } = useEcharts(twelveMonthLineChartOption, colorMode)
+  const { id: twelveWeekLineChartId } = useEcharts(twelveWeekLineChartOption, colorMode)
 
   const rateText = useCallback((rate: string) => {
     if (rate === '-') {
@@ -149,6 +151,13 @@ function App() {
       </Card>
       
 
+
+      <Card flexBasis={"0"} flexGrow={1}>
+        <CardBody>
+        <Box height={"350px"} id={twelveWeekLineChartId}></Box>
+        </CardBody>
+      </Card>
+
         
 
       <Card flexBasis={"0"} flexGrow={1}>
@@ -199,7 +208,7 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
       type: 'value',
       // max: 300,
       interval: 30,
-      max: (v) => v.max > 180 ? (Math.floor(v.max / 30) + 1) * 30 : 210
+      max: (v) => v.max > EXPECT * 60 ? (Math.floor(v.max / 30) + 1) * 30 : (EXPECT * 60 + 30)
     },
     series: [
       {
@@ -252,7 +261,7 @@ function twelveMonthLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChart
       type: 'value',
       // max: 300,
       interval: 10,
-      max: (v) => v.max > EXPECT * 30 ? (Math.floor(v.max / 10) + 1) * 10 : 100
+      max: (v) => v.max > EXPECT * 30 ? (Math.floor(v.max / 10) + 1) * 10 : (EXPECT * 30 + 10)
     },
     series: [
       {
@@ -270,6 +279,72 @@ function twelveMonthLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChart
             name: '平均值',
             lineStyle: {
               color: average >= EXPECT * 30 ? '' : 'red'
+            }
+          }],
+        }
+      }
+    ]
+  }
+}
+
+function twelveWeekLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChartsOption {
+  const thisWeekStart = today.day() === 0 ? today.subtract(1, 'week').add(1, 'day'): today.day(1)
+  const thisWeek = [thisWeekStart, thisWeekStart.add(1, 'week').subtract(1, 'day')] as const
+  
+  const weeks: [Dayjs, Dayjs, string][] = []
+  for (let i = 0; i < 12; i++) {
+    const [start, end] = thisWeek.map(x=>x.subtract(i, 'week'))
+    weeks.push([start, end, `${start.format('MM-DD')}~${end.format('MM-DD')}`])
+  }
+  weeks.reverse()
+
+  const datas: number[] = new Array(weeks.length).fill(0)
+
+  dayDatas.forEach(([date, v]) => {
+    const idx = _.findIndex(weeks, ([start, end]) => dayjsLe(start, date) && dayjsLe(date, end))!
+    datas[idx] += v / 60
+  })
+  datas
+  // const v = _.groupBy(dayDatas.map(([d, v]) => [d.format('YY-MM'), v] as [string, number]).filter(([date,]) => months.has(date)), d => d[0])
+  // const datas: [string, string][] = []
+  // for (const month of Object.keys(v).sort((a, b) => b.localeCompare(a))) {
+  //   datas.push([month, (v[month].map(x => x[1]).reduce((acc, x) => acc + x, 0) / 60).toFixed(2)])
+  // }
+
+  const average = datas.length === 0 ? 0 : _(datas).sum() / datas.length
+  return {
+    title: {
+      text: '近 12 周绘画时间（小时）'
+    },
+    tooltip: {
+      trigger: 'item',
+    },
+    xAxis: {
+      type: 'category',
+      data: weeks.map(x=>x[2]).reverse()
+    },
+    yAxis: {
+      type: 'value',
+      // max: 300,
+      interval: 2,
+      max: (v) => v.max > EXPECT * 7 ? (Math.floor(v.max / 3) + 1) * 3 : (EXPECT * 7 + 2)
+    },
+    series: [
+      {
+        data: datas.reverse().map(x=>x.toFixed(2)),
+        type: 'line',
+        smooth: true,
+        // sampling: 'average',
+        symbolSize: 8,
+        markLine: {
+          data: [{
+            name: '期望',
+            yAxis: EXPECT * 7,
+          }, {
+            type: 'average',
+            name: '平均值',
+            lineStyle: {
+              color: average >= EXPECT * 7 ? '' : 'red'
             }
           }],
         }
