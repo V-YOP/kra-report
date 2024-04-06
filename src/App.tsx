@@ -2,6 +2,7 @@ import { Box, Button, Card, CardBody, CardHeader, Container, Flex, Grid, GridIte
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Heatmap from './Heatmap'
 import { useStat } from './useStat'
+import * as echarts from 'echarts'
 import { EChartsOption } from 'echarts'
 import { useEcharts } from './useEcharts'
 import { Dayjs } from 'dayjs'
@@ -304,12 +305,6 @@ function twelveWeekLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): ECharts
     const idx = _.findIndex(weeks, ([start, end]) => dayjsLe(start, date) && dayjsLe(date, end))!
     datas[idx] += v / 60
   })
-  datas
-  // const v = _.groupBy(dayDatas.map(([d, v]) => [d.format('YY-MM'), v] as [string, number]).filter(([date,]) => months.has(date)), d => d[0])
-  // const datas: [string, string][] = []
-  // for (const month of Object.keys(v).sort((a, b) => b.localeCompare(a))) {
-  //   datas.push([month, (v[month].map(x => x[1]).reduce((acc, x) => acc + x, 0) / 60).toFixed(2)])
-  // }
 
   const average = datas.length === 0 ? 0 : _(datas).sum() / datas.length
   return {
