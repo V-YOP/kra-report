@@ -80,14 +80,14 @@ function App() {
                     {rateText(stat.week.realRate)}
                   </StatHelpText>
                 </Stat>
-                <Stat flexBasis={'10em'} flexGrow={0}>
+                <Stat flexBasis={'11em'} flexGrow={0}>
                   <StatLabel>本周（小时）</StatLabel>
-                  <StatNumber>{minuteToHour(stat.week.thisNaturalNum)} / {EXPECT * 7}</StatNumber>
+                  <StatNumber>{minuteToHour(stat.week.thisNaturalNum)} / {EXPECT * 7} ({(dayExpect * 7).toFixed(0)})</StatNumber>
                   <StatHelpText>
                     {rateText(stat.week.naturalRate)}
                   </StatHelpText>
                 </Stat>
-                <MyProgress max={EXPECT * 7} expect={(stat.today.diff(stat.week.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.week.thisNaturalNum)}></MyProgress>
+                <MyProgress max={dayExpect * 7} expect={(stat.today.diff(stat.week.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.week.thisNaturalNum)}></MyProgress>
               </HStack>
               <HStack>
                 <Stat flexBasis={'8em'} flexGrow={0}>
@@ -97,14 +97,14 @@ function App() {
                     {rateText(stat.month.realRate)}
                   </StatHelpText>
                 </Stat>
-                <Stat flexBasis={'10em'} flexGrow={0}>
+                <Stat flexBasis={'11em'} flexGrow={0}>
                   <StatLabel>本月（小时）</StatLabel>
-                  <StatNumber>{minuteToHour(stat.month.thisNaturalNum)} / {EXPECT * 30}</StatNumber>
+                  <StatNumber>{minuteToHour(stat.month.thisNaturalNum)} / {EXPECT * 30} ({(dayExpect * 30).toFixed(0)})</StatNumber>
                   <StatHelpText>
                     {rateText(stat.month.naturalRate)}
                   </StatHelpText>
                 </Stat>
-                <MyProgress max={EXPECT * 30} expect={(stat.today.diff(stat.month.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.month.thisNaturalNum)}></MyProgress>
+                <MyProgress max={dayExpect * 30} expect={(stat.today.diff(stat.month.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.month.thisNaturalNum)}></MyProgress>
               </HStack>
 
               <HStack>
@@ -116,7 +116,7 @@ function App() {
                   </StatHelpText>
                 </Stat>
 
-                <Stat flexBasis={'10em'} flexGrow={0}>
+                <Stat flexBasis={'11em'} flexGrow={0}>
                   <StatLabel>本年（小时）</StatLabel>
                   <StatNumber>{minuteToHour(stat.year.thisNaturalNum)} / {EXPECT * 365} </StatNumber>
                   <StatHelpText>
