@@ -191,8 +191,41 @@ function App() {
 
 export default App
 
+function allWeeks(days: Dayjs[]): {min: number, max: number, color: string}[] {
+  if (days.length === 0) {
+    return []
+  }
+  const res: {min: number, max: number, color: string}[] = []
+  
+  let lastColor = 'grey'
+  function nextColor() {
+    let res
+    if (lastColor === 'grey') {
+      res = 'blue'
+    } else {
+      res = 'grey'
+    }
+    lastColor = res
+    return res
+  }
+
+  let start = 0
+  for (const mondayIdx in days) {
+    if (days[+mondayIdx].day() !== 1) continue
+    res.push({min: start, max: +mondayIdx + 1, color: nextColor()})
+    start = +mondayIdx + 1
+  }
+  const lastDay = days[days.length - 1]
+  if (lastDay.day() !== 1) {
+    res.push({min: start, max: days.length, color: nextColor()})
+  }
+  console.log('res', res)
+  return res
+}
+
 function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChartsOption {
-  const fourteenDaysAgo = today.subtract(27, 'day')
+  const fourteenDaysAgo = today.subtract(59, 'day')
+  console.log('daydatas', dayDatas)
   const [dates, values] = _(dayDatas)
     .filter(([date]) => dayjsLe(date, today) && dayjsLe(fourteenDaysAgo, date))
     .map(([date, value]) => [date.format('MM-DD'), value] as [string, number])
@@ -201,14 +234,23 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
   const average = values.length === 0 ? 0 : _(values).sum() / values.length
   return {
     title: {
-      text: '近 28 天每日绘画时间（分）'
+      text: '近 60 天每日绘画时间（分）'
     },
     tooltip: {
       trigger: 'item',
     },
+    visualMap: {
+      type: 'piecewise',
+      show: false,
+      dimension: 0,
+      seriesIndex: 0,
+      // selectedMode: 'single',
+      pieces: allWeeks(dayDatas.map(x=>x[0]).reverse())
+    },
     xAxis: {
       type: 'category',
-      data: dates
+      data: dates,
+      boundaryGap: false
     },
     yAxis: {
       type: 'value',
@@ -216,13 +258,27 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
       interval: 30,
       max: (v) => v.max > EXPECT * 60 ? (Math.floor(v.max / 30) + 1) * 30 : (EXPECT * 60 + 30)
     },
+    dataZoom: [
+      {
+        type: 'inside',
+        startValue: 0,
+        endValue: 13,
+      },
+      {
+        startValue: 0,
+        endValue: 13,
+      }
+    ],
     series: [
       {
         data: values,
         type: 'line',
-        smooth: true,
+        smooth: false,
         // sampling: 'average',
         symbolSize: 8,
+        areaStyle: {
+
+        },
         markLine: {
           data: [{
             name: '期望',
@@ -231,7 +287,7 @@ function fourteenDaysLineChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChar
             type: 'average',
             name: '平均值',
             lineStyle: {
-              color: average >= EXPECT * 60 ? '' : 'red'
+              color: 'red' // average >= EXPECT * 60 ? '' : 'red'
             }
           }],
         }
