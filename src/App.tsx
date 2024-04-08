@@ -38,8 +38,13 @@ function App() {
 
   const [range, setRange] = useState(17)
 
-  console.log('year', stat.year.thisNatural[0].format('YYYY-MM-DD'), (stat.today.diff(stat.year.thisNatural[0], 'day') + 1))
-
+  const dayExpect = useMemo(() => {
+    const lastHours = EXPECT * 365 - +minuteToHour(stat.year.thisNaturalNum)
+    console.log('lastHours', lastHours)
+    const diff = stat.year.thisNatural[0].add(1, 'year').diff(stat.today, 'day')
+    return lastHours / diff
+  }, [stat.year.thisNaturalNum, stat.year.thisNatural[1], stat.today])
+  console.log('dayExpect', dayExpect)
   return (
     <Container maxW='96em'>
       {/* <AnotherProgress /> */}
@@ -50,14 +55,14 @@ function App() {
           <Card>
             <CardBody>
               <HStack>
-                <Stat flexBasis={'10em'} flexGrow={0} >
+                <Stat flexBasis={'11em'} flexGrow={0} >
                   <StatLabel>本日（小时）</StatLabel>
-                  <StatNumber>{minuteToHour(stat.day.thisNaturalNum)} / {EXPECT}</StatNumber>
+                  <StatNumber>{minuteToHour(stat.day.thisNaturalNum)} / {EXPECT} ({dayExpect.toFixed(1)})</StatNumber>
                   <StatHelpText>
                     {rateText(stat.day.realRate)}
                   </StatHelpText>
                 </Stat>
-                <MyProgress max={EXPECT} value={+minuteToHour(stat.day.thisNaturalNum)}></MyProgress>
+                <MyProgress max={dayExpect} expect={EXPECT} value={+minuteToHour(stat.day.thisNaturalNum)}></MyProgress>
               </HStack>
             </CardBody>
           </Card>
