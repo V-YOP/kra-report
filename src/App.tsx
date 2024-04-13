@@ -58,9 +58,12 @@ function App() {
                 <Stat flexBasis={'11em'} flexGrow={0} >
                   <StatLabel>本日（小时）</StatLabel>
                   <StatNumber>{minuteToHour(stat.day.thisNaturalNum)} / {EXPECT} ({dayExpect.toFixed(1)})</StatNumber>
-                  <StatHelpText>
-                    {rateText(stat.day.realRate)}
-                  </StatHelpText>
+                  
+                  <Tooltip hasArrow label={`昨日：${minuteToHour(stat.day.lastNaturalNum)} 小时`}>
+                    <StatHelpText width={'fit-content'}>
+                      {rateText(stat.day.realRate)}
+                    </StatHelpText>
+                  </Tooltip>
                 </Stat>
                 <MyProgress max={dayExpect} expect={EXPECT} value={+minuteToHour(stat.day.thisNaturalNum)}></MyProgress>
               </HStack>
@@ -76,33 +79,45 @@ function App() {
                 <Stat flexBasis={'8em'} flexGrow={0}>
                   <StatLabel>近一周（小时）</StatLabel>
                   <StatNumber>{minuteToHour(stat.week.thisRealNum)}</StatNumber>
-                  <StatHelpText>
-                    {rateText(stat.week.realRate)}
-                  </StatHelpText>
+                  
+                  <Tooltip hasArrow label={`上近一周：${minuteToHour(stat.week.lastRealNum)} 小时`}>
+                    <StatHelpText width={'fit-content'}>
+                      {rateText(stat.week.realRate)}
+                    </StatHelpText>
+                  </Tooltip>
                 </Stat>
-                <Stat flexBasis={'11em'} flexGrow={0}>
-                  <StatLabel>本周（小时）</StatLabel>
-                  <StatNumber>{minuteToHour(stat.week.thisNaturalNum)} / {EXPECT * 7} ({(dayExpect * 7).toFixed(0)})</StatNumber>
-                  <StatHelpText>
-                    {rateText(stat.week.naturalRate)}
-                  </StatHelpText>
-                </Stat>
+                  <Stat flexBasis={'11em'} flexGrow={0}>
+                      <StatLabel>本周（小时）</StatLabel>
+                      <StatNumber>{minuteToHour(stat.week.thisNaturalNum)} / {EXPECT * 7} ({(dayExpect * 7).toFixed(0)})</StatNumber>
+                      
+                  <Tooltip hasArrow label={`上周：${minuteToHour(stat.week.lastNaturalNum)} 小时`}>
+                    <StatHelpText width={'fit-content'}>
+                      {rateText(stat.week.naturalRate)}
+                    </StatHelpText>
+                  </Tooltip>
+                  </Stat>
                 <MyProgress max={dayExpect * 7} expect={(stat.today.diff(stat.week.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.week.thisNaturalNum)}></MyProgress>
               </HStack>
               <HStack>
                 <Stat flexBasis={'8em'} flexGrow={0}>
                   <StatLabel>近一月（小时）</StatLabel>
                   <StatNumber>{minuteToHour(stat.month.thisRealNum)}</StatNumber>
-                  <StatHelpText>
-                    {rateText(stat.month.realRate)}
-                  </StatHelpText>
+                  
+                  <Tooltip hasArrow label={`上近一月：${minuteToHour(stat.month.lastRealNum)} 小时`}>
+                    <StatHelpText width={'fit-content'}>
+                      {rateText(stat.month.realRate)}
+                    </StatHelpText>
+                  </Tooltip>
                 </Stat>
                 <Stat flexBasis={'11em'} flexGrow={0}>
                   <StatLabel>本月（小时）</StatLabel>
                   <StatNumber>{minuteToHour(stat.month.thisNaturalNum)} / {EXPECT * 30} ({(dayExpect * 30).toFixed(0)})</StatNumber>
-                  <StatHelpText>
-                    {rateText(stat.month.naturalRate)}
-                  </StatHelpText>
+                  
+                  <Tooltip hasArrow label={`上月：${minuteToHour(stat.month.lastNaturalNum)} 小时`}>
+                    <StatHelpText width={'fit-content'}>
+                      {rateText(stat.month.naturalRate)}
+                    </StatHelpText>
+                  </Tooltip>
                 </Stat>
                 <MyProgress max={dayExpect * 30} expect={(stat.today.diff(stat.month.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.month.thisNaturalNum)}></MyProgress>
               </HStack>
@@ -111,17 +126,23 @@ function App() {
                 <Stat flexBasis={'8em'} flexGrow={0}>
                   <StatLabel>近一年（小时）</StatLabel>
                   <StatNumber>{minuteToHour(stat.year.thisRealNum)}</StatNumber>
-                  <StatHelpText>
-                    {rateText(stat.year.realRate)}
-                  </StatHelpText>
+                  
+                  <Tooltip hasArrow label={`上近一年：${minuteToHour(stat.year.lastRealNum)} 小时`}>
+                    <StatHelpText width={'fit-content'}>
+                      {rateText(stat.year.realRate)}
+                    </StatHelpText>
+                  </Tooltip>
                 </Stat>
 
                 <Stat flexBasis={'11em'} flexGrow={0}>
                   <StatLabel>本年（小时）</StatLabel>
                   <StatNumber>{minuteToHour(stat.year.thisNaturalNum)} / {EXPECT * 365} </StatNumber>
-                  <StatHelpText>
-                    {rateText(stat.year.naturalRate)}
-                  </StatHelpText>
+                  
+                  <Tooltip hasArrow label={`去年：${minuteToHour(stat.year.lastNaturalNum)} 小时`}>
+                    <StatHelpText width={'fit-content'}>
+                      {rateText(stat.year.naturalRate)}
+                    </StatHelpText>
+                  </Tooltip>
                 </Stat>
                 <MyProgress max={EXPECT * 365} expect={(stat.today.diff(stat.year.thisNatural[0], 'day') + 1) * EXPECT} value={+minuteToHour(stat.year.thisNaturalNum)}></MyProgress>
               </HStack>
@@ -506,3 +527,4 @@ function AnotherProgress() {
 
   return <svg ref={ref}></svg>
 }
+
