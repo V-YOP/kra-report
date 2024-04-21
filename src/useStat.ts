@@ -120,13 +120,3 @@ function getToday(): Dayjs {
   }
   return now.startOf('date')
 }
-
-function days(startInclusive: Dayjs, endInclusive: Dayjs): Dayjs[] {
-  const start = startInclusive.startOf('date')
-  const end = endInclusive.startOf('date')
-  const res: Dayjs[] = []
-  for (let i = start; i.isBefore(end) || i.isSame(end); i = i.add(1, 'day')) {
-    res.push(i)
-  }
-  return res
-}
