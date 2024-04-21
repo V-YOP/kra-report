@@ -75,7 +75,6 @@ export function useStat(mockData: string = ''): KraStat {
   }, [today, getRangeSum])
 
   const sum = Object.values(dateStrToNum).reduce((acc, x) => acc + x, 0)
-
   const startDay = dayjs(_(Object.keys(dateStrToNum)).map(x => dayjs(x, 'YYYY-MM-DD')).minBy(d => d))
   const dayDatas = days(startDay, today).map(day => [day, getDayNum(day)] as [Dayjs, number])
   return { today, sum, dayDatas, day: getPeriodDatas('day'), month: getPeriodDatas('month'), week: getPeriodDatas('week'), year: getPeriodDatas('year') }
@@ -91,7 +90,6 @@ function useHash(mockData: string = ''): string {
   const [hash, setHash] = useState<string>('');
   useEffect(() => {
     function onHashChange() {
-      console.log('meme')
       if (mockData.length !== 0) {
         setHash(mockData)
         return
@@ -120,3 +118,13 @@ function getToday(): Dayjs {
   }
   return now.startOf('date')
 }
+
+// function days(startInclusive: Dayjs, endInclusive: Dayjs): Dayjs[] {
+//   const start = startInclusive.startOf('date')
+//   const end = endInclusive.startOf('date')
+//   const res: Dayjs[] = []
+//   for (let i = start; i.isBefore(end) || i.isSame(end); i = i.add(1, 'day')) {
+//     res.push(i)
+//   }
+//   return res
+// }

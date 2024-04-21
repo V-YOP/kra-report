@@ -90,10 +90,10 @@ export function singleton<T>(supplier: () => T): () => T {
 }
 
 export function days(startInclusive: Date | Dayjs, endInclusive: Date | Dayjs): Dayjs[] {
-  const a = dayjs(startInclusive)
-  const b = dayjs(endInclusive)
+  const a = dayjs(startInclusive).startOf('date')
+  const b = dayjs(endInclusive).startOf('date')
   if (a.isSame(b)) {
-    return []
+    return [a]
   }
 
   const dayDatas = []
