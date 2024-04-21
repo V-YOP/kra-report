@@ -36,7 +36,7 @@ export function useStat(mockData: string = ''): KraStat {
   const dateStrToNum = useMemo(() => parseDatas(hash), [hash])
   const getDayNum = useCallback((date: Dayjs) => dateStrToNum[date.format('YYYY-MM-DD')] ?? 0, [dateStrToNum])
   const getRangeSum = useCallback((start: Dayjs, end: Dayjs) => {
-    return getRangeDays(start, end).reduce((acc, x) => acc + getDayNum(x), 0)
+    return days(start, end).reduce((acc, x) => acc + getDayNum(x), 0)
   }, [getDayNum])
 
   const today = getToday()
@@ -121,7 +121,7 @@ function getToday(): Dayjs {
   return now.startOf('date')
 }
 
-function getRangeDays(startInclusive: Dayjs, endInclusive: Dayjs): Dayjs[] {
+function days(startInclusive: Dayjs, endInclusive: Dayjs): Dayjs[] {
   const start = startInclusive.startOf('date')
   const end = endInclusive.startOf('date')
   const res: Dayjs[] = []

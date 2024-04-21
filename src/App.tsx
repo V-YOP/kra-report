@@ -58,7 +58,6 @@ function App() {
                 <Stat flexBasis={'11em'} flexGrow={0} >
                   <StatLabel>本日（小时）</StatLabel>
                   <StatNumber>{minuteToHour(stat.day.thisNaturalNum)} / {EXPECT} ({dayExpect.toFixed(1)})</StatNumber>
-                  
                   <Tooltip hasArrow label={`昨日：${minuteToHour(stat.day.lastNaturalNum)} 小时`}>
                     <StatHelpText width={'fit-content'}>
                       {rateText(stat.day.realRate)}
@@ -218,13 +217,13 @@ function allWeeks(days: Dayjs[]): {min: number, max: number, color: string}[] {
   }
   const res: {min: number, max: number, color: string}[] = []
   
-  let lastColor = 'grey'
+  let lastColor = 'green'
   function nextColor() {
     let res
-    if (lastColor === 'grey') {
+    if (lastColor === 'green') {
       res = 'blue'
     } else {
-      res = 'grey'
+      res = 'green'
     }
     lastColor = res
     return res
