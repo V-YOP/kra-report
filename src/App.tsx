@@ -44,14 +44,18 @@ function App() {
     const diff = stat.year.thisNatural[0].add(1, 'year').diff(stat.today, 'day')
     return lastHours / diff
   }, [stat.year.thisNaturalNum, stat.year.thisNatural[1], stat.today])
-  console.log('dayExpect', dayExpect)
+  
+
+  console.log('build', buildTreeData(stat.dayDatas))
+  const {maxNum, continousMaxNum, sumNum} = useMemo(() => clockInStat(stat.today, stat.dayDatas), [stat.today, stat.dayDatas])
+
   return (
     <Container maxW='96em'>
       {/* <AnotherProgress /> */}
       <Button onClick={toggleColorMode}>toggle</Button>
-      <Flex flexWrap={'wrap'} gap={4}>
+      <Flex flexWrap={'wrap'} gap={4} mt={4} justifyContent={'stretch'}>
 
-        <Box flexBasis={"100%"}>
+        <Box flexBasis={'49%'} flexGrow={1} >
           <Card>
             <CardBody>
               <HStack>
@@ -65,6 +69,29 @@ function App() {
                   </Tooltip>
                 </Stat>
                 <MyProgress max={dayExpect} expect={EXPECT} value={+minuteToHour(stat.day.thisNaturalNum)}></MyProgress>
+              </HStack>
+            </CardBody>
+          </Card>
+        </Box>
+
+        <Box flexBasis={'49%'} flexGrow={1}>
+          <Card height={'100%'}>
+            <CardBody>
+              <HStack height={'100%'} justifyContent={'space-around'}>
+                <Stat flexGrow={0} flexBasis={'fit-content'}>
+                  <StatLabel>当前连续打卡（天）</StatLabel>
+                  <StatNumber textAlign={'center'}>{continousMaxNum}</StatNumber>
+                </Stat>
+
+                <Stat flexGrow={0} flexBasis={'fit-content'}>
+                  <StatLabel>最长连续打卡（天）</StatLabel>
+                  <StatNumber textAlign={'center'}>{maxNum}</StatNumber>
+                </Stat>
+                
+                <Stat flexGrow={0} flexBasis={'fit-content'}>
+                  <StatLabel>总打卡（天）</StatLabel>
+                  <StatNumber textAlign={'center'}>{sumNum}</StatNumber>
+                </Stat>
               </HStack>
             </CardBody>
           </Card>
@@ -150,8 +177,6 @@ function App() {
             </CardBody>
           </Card>
         </Box>
-
-        
 
       <Card flexBasis={"0"} flexGrow={1}>
         <CardBody>
@@ -527,3 +552,109 @@ function AnotherProgress() {
   return <svg ref={ref}></svg>
 }
 
+
+function continousGroups(today: Dayjs, dayDatas: [Dayjs, number][]): [Dayjs, number][][] {
+  const groups: [Dayjs, number][][] = []
+
+  for (const dayData of dayDatas) {
+    const day = dayData[0]
+    if (dayData[1] < EXPECT * 60) {
+      continue
+    }
+
+    if (groups.length === 0) {
+      groups.push([dayData])
+      continue
+    }
+    const lastGroup = groups[groups.length - 1]
+    const [lastDay] = lastGroup[lastGroup.length - 1]
+    if (Math.abs(lastDay.diff(day, 'day')) <= 1) {
+      lastGroup.push(dayData)
+    } else {
+      groups.push([dayData])
+    }
+  }
+
+  return groups
+}
+
+function mkClockInStat() {
+  return {
+    maxNum: 0,
+    continousMaxNum: 0,
+    sumNum: 0
+  }
+}
+
+function clockInStat(today: Dayjs, dayDatas: [Dayjs, number][]) {
+  const groups = continousGroups(today, dayDatas)
+
+  const res = mkClockInStat()
+
+  if (groups.length === 0) {
+    return res
+  }
+
+  let maxNumGroup = groups[0]
+  for (const group of groups) {
+    if (group.length > maxNumGroup.length) {
+      maxNumGroup = group
+    }
+  }
+
+  const lastGroup = groups[groups.length - 1]
+  const lastDay = lastGroup[lastGroup.length - 1][0]
+
+  let continousNumGroup: [Dayjs, number][] = []
+  if (lastDay.day() === today.day() || Math.abs(lastDay.diff(today, 'day', false)) === 1) {
+    continousNumGroup = lastGroup
+  }
+
+  res.maxNum = maxNumGroup.length
+  res.continousMaxNum = continousNumGroup.length
+  res.sumNum = groups.flat().length
+  return res
+}
+
+
+type TreeDrawData = {
+  name: string,
+  value: number
+} | {
+  name: string,
+  children: TreeDrawData[]
+}
+
+function buildTreeData(datas: [Dayjs, number][]): TreeDrawData[] {
+  // 2 level: month -> day
+  const yyyyMMtoDayDatas: Record<string, [string, number][]> = {}
+  for (const [day, v] of datas) {
+    const yyyyMM = day.format('YYYY-MM')
+    if (!yyyyMMtoDayDatas[yyyyMM]) {
+      yyyyMMtoDayDatas[yyyyMM] = []
+    }
+
+    yyyyMMtoDayDatas[yyyyMM].push([day.date() + '', v])
+  }
+  const entries = Object.entries(yyyyMMtoDayDatas)
+  entries.sort(([a], [b]) => a.localeCompare(b))
+
+  return entries.flatMap(([month, dayDatas]) => {
+
+    const children = dayDatas.map(([day, v]) => {
+      return {
+        name: day,
+        value: v,
+      }
+    }).filter(x => x.value !== 0)
+
+    if (children.length === 0) {
+      return []
+    }
+    
+    return [{
+      name: month,
+      children,
+    }]
+  })
+}
