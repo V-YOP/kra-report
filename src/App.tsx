@@ -22,9 +22,15 @@ function App() {
   const fourteenDaysEChartOption = useMemo(() => fourteenDaysLineChart(stat.today, stat.dayDatas), [stat])
   const twelveMonthLineChartOption = useMemo(() => twelveMonthLineChart(stat.today, stat.dayDatas), [stat])
   const twelveWeekLineChartOption = useMemo(() => twelveWeekLineChart(stat.today, stat.dayDatas), [stat])
+
+  const treeDrawDataChartOption = useMemo(() => treeDrawDataChart(stat.today, stat.dayDatas), [stat])
+
   const { id: fourteenDaysEChartId } = useEcharts(fourteenDaysEChartOption, colorMode)
   const { id: twelveMonthLineChartId } = useEcharts(twelveMonthLineChartOption, colorMode)
   const { id: twelveWeekLineChartId } = useEcharts(twelveWeekLineChartOption, colorMode)
+
+
+  const {id: treeDrawDataChartId} = useEcharts(treeDrawDataChartOption, colorMode)
 
   const rateText = useCallback((rate: string) => {
     if (rate === '-') {
@@ -203,7 +209,7 @@ function App() {
       
 
 
-      <Card flexBasis={"0"} flexGrow={1}>
+      <Card flexBasis={"49%"} flexGrow={1}>
         <CardBody>
         <Box height={"350px"} id={twelveWeekLineChartId}></Box>
         </CardBody>
@@ -211,11 +217,18 @@ function App() {
 
         
 
-      <Card flexBasis={"0"} flexGrow={1}>
+      <Card flexBasis={"49%"} flexGrow={1}>
         <CardBody>
         <Box height={"350px"} id={twelveMonthLineChartId}></Box>
         </CardBody>
       </Card>
+
+      <Card flexBasis={"52%"} flexGrow={1}>
+        <CardBody>
+        <Box height={"800px"} id={treeDrawDataChartId}></Box>
+        </CardBody>
+      </Card>
+
 
 
       </Flex>
@@ -657,4 +670,22 @@ function buildTreeData(datas: [Dayjs, number][]): TreeDrawData[] {
       children,
     }]
   })
+}
+
+function treeDrawDataChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChartsOption {
+
+  return {
+    series: {
+      type: 'sunburst',
+      sort: undefined,
+      // emphasis: {
+      //     focus: 'ancestor'
+      // },
+      data: buildTreeData(dayDatas),
+      radius: [0, '90%'],
+      label: {
+        rotate: 'radial'
+      }
+    }
+  };
 }
