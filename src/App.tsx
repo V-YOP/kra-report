@@ -639,37 +639,40 @@ type TreeDrawData = {
 }
 
 function buildTreeData(datas: [Dayjs, number][]): TreeDrawData[] {
-  // 2 level: month -> day
-  const yyyyMMtoDayDatas: Record<string, [string, number][]> = {}
+  // 3 level: month -> weekOfYear -> day
+  const yyyyMMtoWeekOfYearToDayDatas: Record<string, Record<string, Record<string, number>>> = {}
   for (const [day, v] of datas) {
     const yyyyMM = day.format('YYYY-MM')
-    if (!yyyyMMtoDayDatas[yyyyMM]) {
-      yyyyMMtoDayDatas[yyyyMM] = []
+    const weekOfYear = '' + (day.day() === 0 ? day.week() - 1 : day.week())
+    if (!yyyyMMtoWeekOfYearToDayDatas[yyyyMM]) {
+      yyyyMMtoWeekOfYearToDayDatas[yyyyMM] = {}
     }
-
-    yyyyMMtoDayDatas[yyyyMM].push([day.date() + '', v])
+    if (!yyyyMMtoWeekOfYearToDayDatas[yyyyMM][weekOfYear]) {
+      yyyyMMtoWeekOfYearToDayDatas[yyyyMM][weekOfYear] = {}
+    }
+    yyyyMMtoWeekOfYearToDayDatas[yyyyMM][weekOfYear][day.date()] = v
   }
-  const entries = Object.entries(yyyyMMtoDayDatas)
+
+  const res: TreeDrawData[] = []
+
+  const entries = Object.entries(yyyyMMtoWeekOfYearToDayDatas)
   entries.sort(([a], [b]) => a.localeCompare(b))
-
-  return entries.flatMap(([month, dayDatas]) => {
-
-    const children = dayDatas.map(([day, v]) => {
-      return {
-        name: day,
-        value: v,
-      }
-    }).filter(x => x.value !== 0)
-
-    if (children.length === 0) {
-      return []
+  for (const [yyyyMM, weekOrYearToDay] of entries) {
+    const tmp: TreeDrawData = {
+      name: yyyyMM, children: []
     }
-    
-    return [{
-      name: month,
-      children,
-    }]
-  })
+    res.push(tmp)
+    const entries1 = Object.entries(weekOrYearToDay).sort(([a], [b]) => +a - +b)
+    for (const [weekOfYear, dayDatas] of entries1) {
+      const tmp1: TreeDrawData = {name: weekOfYear, children: []}
+      tmp.children.push(tmp1)
+      const entries2 = Object.entries(dayDatas).sort(([a], [b]) => +a - +b)
+      for (const [day, data] of entries2) {
+        tmp1.children.push({name: day, value: data})
+      }
+    }
+  }
+  return res
 }
 
 function treeDrawDataChart(today: Dayjs, dayDatas: [Dayjs, number][]): EChartsOption {

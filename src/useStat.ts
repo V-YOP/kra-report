@@ -4,8 +4,10 @@ import _ from "lodash";
 import dayjs, { Dayjs } from "dayjs";
 import dayOfYear from 'dayjs/plugin/dayOfYear'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import weekOfYear from 'dayjs/plugin/weekOfYear'
 dayjs.extend(customParseFormat)
 dayjs.extend(dayOfYear)
+dayjs.extend(weekOfYear)
 
 type PeriodStat = {
   thisNatural: [dayjs.Dayjs, dayjs.Dayjs],
