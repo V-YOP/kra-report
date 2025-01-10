@@ -10,7 +10,7 @@ import _ from 'lodash'
 import * as d3 from "d3";
 import { dayjsLe } from './util'
 
-const EXPECT = 2
+const EXPECT = 1
 
 function minuteToHour(minute: number): string {
   return (minute / 60).toFixed(1)
